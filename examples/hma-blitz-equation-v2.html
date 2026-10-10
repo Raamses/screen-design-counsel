@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>HMA Blitz — Equation Presentation v2</title>
+<style>
+  :root{
+    --bg:#F4F0FA; --card:#fff; --ink:#2d2438; --muted:#7a7290; --line:#e4def0;
+    --accent:#7C3AED; --accent2:#059669; --warn:#ef4444; --gold:#f59e0b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#171522; --card:#211d30; --ink:#ece9f5; --muted:#a29bbc; --line:#37324a;
+      --accent:#a78bfa; --accent2:#34d399; --warn:#f87171; --gold:#fbbf24; }
+  }
+  *{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Hebrew",sans-serif}
+  main{max-width:560px;margin:0 auto;padding:14px 12px 90px}
+  h1{font-size:19px;margin:6px 0 2px} .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .chip{display:inline-block;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);
+    border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;margin-left:6px}
+  .locked{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 14px;font-size:12.5px;color:var(--muted)}
+  .locked b{color:var(--accent2)}
+
+  .stage{display:flex;justify-content:center;padding:4px 0 18px}
+  .phone{width:280px;height:585px;border-radius:34px;background:linear-gradient(180deg,#e9e2f7 0%,#f3edff 18%,#eef7ef 60%,#f3edff 100%);
+    position:relative;overflow:hidden;box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 25%,transparent),inset 0 0 0 2px var(--line);color:#2d2438}
+  .stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#c9baf0;opacity:.8}
+  .langrow{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:5}
+  .langrow button{border:0;border-radius:999px;padding:3px 10px;font-size:10px;font-weight:900;cursor:pointer;background:#ffffffcc;color:#4b4360}
+  .langrow button.on{background:#7C3AED;color:#fff}
+
+  .hudchip{position:static;display:flex;justify-content:center;padding:2px 0 3px}
+  .hudchip span{font-size:9px;font-weight:900;color:#059669;letter-spacing:1px;text-transform:uppercase}
+  .hudbar{display:flex;align-items:center;gap:5px;padding:30px 9px 4px}
+  .hudbar .gear{width:28px;height:28px;border-radius:50%;background:#fff;flex:none;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.14)}
+  .hearts{display:flex;gap:2px;flex:none}
+  .heart{width:11px;height:11px;background:#ef4444;border-radius:3px 3px 0 0;transform:rotate(-45deg) scale(.75);position:relative}
+  .heart:before,.heart:after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:inherit;top:-5.5px}
+  .heart:before{left:-5px}.heart:after{left:0;top:0}
+  .heart.off{background:#d8d5e2}
+  .timer{margin-inline:auto;background:#fff;border-radius:999px;padding:4px 13px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(124,58,237,.18)}
+  .timer .dot{width:9px;height:9px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .prog{background:#fff;border-radius:999px;padding:4px 11px;font-weight:800;font-size:11.5px;flex:none;box-shadow:0 1px 4px rgba(0,0,0,.1);white-space:nowrap}
+
+  .problem{margin:16px 10px 0;background:#fff;border-radius:16px;padding:12px;box-shadow:0 4px 14px rgba(124,58,237,.10);text-align:center}
+  .eq{direction:ltr;unicode-bidi:isolate;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:900;color:#2d2438;line-height:1.1;display:flex;align-items:center;justify-content:center;gap:9px}
+  .eq .hole{color:#8a8298}
+  /* E2 number styles */
+  .eq .n{letter-spacing:0}
+  .eq .tiles .n{background:#f5f0ff;border:2px solid #e2d6fa;border-radius:12px;padding:2px 10px}
+  .eq .tiles{gap:6px}
+  .eq .slab{background:linear-gradient(135deg,#fff7ed,#fef3c7);border:2px solid #fde68a;border-radius:16px;padding:10px 16px;gap:9px}
+  .eq.base{font-size:34px}
+  .eq.big{font-size:44px}
+  .instr{font-size:11px;font-weight:700;color:#8a8298;margin:0 0 4px;direction:rtl}
+
+  .field{position:absolute;top:250px;bottom:0;left:0;right:0;overflow:hidden}
+  .bubble{position:absolute;bottom:24px;width:92px;height:92px;border-radius:50%;right:14px;
+    background:radial-gradient(circle at 32% 28%,#fbbf24,#f59e0b 55%,#d97706);
+    box-shadow:0 10px 28px rgba(217,119,6,.45),inset 0 -8px 14px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center}
+  .bubble .num{font-size:33px;font-weight:900;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+  .multi{position:absolute;top:-12px;right:6px;background:#7C3AED;color:#fff;border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:900;box-shadow:0 3px 10px rgba(124,58,237,.4);white-space:nowrap}
+
+  .group{margin:16px 0 6px;font-size:12px;font-weight:900;color:#059669;letter-spacing:.6px}
+  .opts{display:flex;flex-wrap:wrap;gap:7px}
+  .opt{min-height:40px;display:flex;align-items:center;padding:8px 13px;border-radius:12px;border:2px solid var(--line);
+    background:var(--card);font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;user-select:none}
+  .opt small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+  .opt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card));color:var(--accent)}
+  .pickbar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:9px;align-items:center;z-index:9}
+  .picks{flex:1;font-size:12.5px;font-weight:700;min-width:0}
+  .picks code{font-size:11.5px;background:color-mix(in srgb,#059669 14%,transparent);color:#059669;padding:1px 6px;border-radius:6px}
+  button.copy{min-height:40px;padding:0 16px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-weight:900;font-size:13px;cursor:pointer;white-space:nowrap}
+  .note{color:var(--muted);font-size:11.5px;margin:8px 0 0}
+</style>
+</head>
+<body>
+<main>
+  <h1>HMA Blitz — Equation Presentation <span class="chip">v2 · focused run</span></h1>
+  <p class="sub">Your v1 picks are locked into the mock (<b>P1:2row · P2:hero · P3:r · P4:pure · P5:a</b>). This v2 run focuses ONLY on how the equation itself is presented — clearer and more appealing. The equation is <b>always LTR now</b> (your correction), even when the screen is Hebrew — the Hebrew instruction line stays RTL above it. Pick the two presentation decisions below → <b>Copy picks</b> → paste to AmosBot.</p>
+
+  <div class="locked"><b>Locked from v1:</b> HUD = 1 row + "BLITZ · RAPID" title chip · hero math · bubble right-bottom · pure spawn field · warm amber bubble · equation permanently LTR · the ? hole REMOVED — the bubble itself carries the answer.</div>
+
+  <div class="stage"><div class="phone" id="mock">
+    <div class="langrow">
+      <button id="langHE" class="on" onclick="setLang('he')">עברית</button>
+      <button id="langEN" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="stars" id="stars"></div>
+    <div class="hudbar" id="hud">
+      <div class="gear">⚙️</div>
+      <div class="hearts"><span class="heart"></span><span class="heart"></span><span class="heart off"></span></div>
+      <div class="timer"><span class="dot"></span> 2s</div>
+      <div class="prog" id="hudProg">שלב 10 • 45/50 ◎</div>
+    </div>
+    <div class="hudchip"><span id="hudchipTxt">בליץ • מהיר</span></div>
+    <div class="problem" id="problem">
+      <div class="instr" id="instr">פוצצו את הבועה עם התשובה</div>
+      <div class="eq big" id="eq"><span class="n">814</span><span>−</span><span class="n">98</span><span>=</span></div>
+    </div>
+    <div class="field">
+      <div class="bubble"><span class="multi">3x הכפל 392</span><span class="num">716</span></div>
+    </div>
+  </div></div>
+
+  
+  <div class="group">E2 — number style</div>
+  <div class="opts" data-p="E2">
+    <button class="opt on" data-v="plain">Plain big digits <small>mono, spaced</small></button>
+    <button class="opt" data-v="tiles">Chunky tiles per number <small>toy-like, kid-friendly</small></button>
+    <button class="opt" data-v="slab">Warm slab behind equation <small>the whole equation pops on amber tint</small></button>
+  </div>
+
+  <div class="group">E3 — size emphasis</div>
+  <div class="opts" data-p="E3">
+    <button class="opt" data-v="base">Medium (34px) <small>instruction reads first</small></button>
+    <button class="opt on" data-v="big">Hero (44px) <small>math dominates — your v1 pick</small></button>
+  </div>
+
+  <div class="pickbar">
+    <div class="picks" id="picks"></div>
+    <button class="copy" id="copy">Copy picks</button>
+  </div>
+  <p class="note">Locks: v1 picks + the always-LTR equation. This page's pick becomes the final equation spec in the implementation.</p>
+</main>
+<script>
+  const PICKS = {E2:'plain',E3:'big'};
+  let LANG='he';
+  const STR = {
+    he:{hudDir:'rtl', instr:'פוצצו את הבועה עם התשובה', stage:'שלב 10 • 45/50 ◎', multi:'3x הכפל 392'},
+    en:{hudDir:'ltr', instr:'Pop the bubble with the answer', stage:'Stage 10 • 45/50 ◎', multi:'3x x392'}
+  };
+  const st = document.getElementById('stars');
+  let seed = 7;
+  const rnd = () => (seed = (seed*1103515245+12345) & 0x7fffffff) / 0x7fffffff;
+  for (let i=0;i<24;i++){ const s=document.createElement('i'); s.style.left=(rnd()*96+2)+'%'; s.style.top=(rnd()*92+2)+'%'; s.style.opacity=(.25+.6*rnd()).toFixed(2); st.appendChild(s); }
+  function setLang(l){
+    LANG=l; const s=STR[l];
+    document.getElementById('mock').dir=s.hudDir;
+    document.getElementById('instr').textContent=s.instr;
+    document.getElementById('hudProg').textContent=s.stage;
+    document.getElementById('hudchipTxt').textContent = LANG==='he' ? 'בליץ • מהיר' : 'BLITZ • RAPID';
+    document.getElementById('langHE').classList.toggle('on',l==='he');
+    document.getElementById('langEN').classList.toggle('on',l==='en');
+    render();
+  }
+  function render(){
+    const eq = document.getElementById('eq');
+    eq.className = 'eq ' + (PICKS.E3==='big'?'big':'base') + (PICKS.E2==='slab'?' slab':'') + (PICKS.E2==='tiles'?' tiles':'');
+    document.querySelectorAll('#eq .n').forEach(n=>n.classList.add('n'));
+    const txt = 'HMA-BLITZ-EQ v2 — ' + Object.entries(PICKS).map(([k,v])=>k+':'+v).join(' ');
+    document.getElementById('picks').innerHTML = 'Picks: ' + Object.entries(PICKS).map(([k,v])=>'<code>'+k+':'+v+'</code>').join(' ');
+    document.getElementById('copy').textContent = 'Copy picks';
+    document.getElementById('copy').dataset.txt = txt;
+  }
+  document.querySelectorAll('.opts').forEach(g=>{
+    g.addEventListener('click', e=>{
+      const b = e.target.closest('.opt'); if(!b) return;
+      g.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); PICKS[g.dataset.p] = b.dataset.v; render();
+    });
+  });
+  document.getElementById('copy').addEventListener('click', ()=>{
+    const b = document.getElementById('copy');
+    const txt = b.dataset.txt;
+    let ok = false;
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed'; ta.style.opacity = '0'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { ok = document.execCommand('copy'); } catch(e) { ok = false; }
+    document.body.removeChild(ta);
+    if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(()=>{}, ()=>{});
+      ok = true;
+    }
+    b.textContent = ok ? 'Copied \u2713' : 'Long-press the Picks text';
+    if (ok) setTimeout(render, 1400);
+  });
+  render();
+</script>
+</body>
+</html>

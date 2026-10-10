@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>HMA Blitz — Screen Rework: Pick Your Version</title>
+<style>
+  :root{
+    --bg:#F4F0FA; --card:#fff; --ink:#2d2438; --muted:#7a7290; --line:#e4def0;
+    --accent:#7C3AED; --accent2:#059669; --warn:#ef4444; --gold:#f59e0b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#171522; --card:#211d30; --ink:#ece9f5; --muted:#a29bbc; --line:#37324a;
+      --accent:#a78bfa; --accent2:#34d399; --warn:#f87171; --gold:#fbbf24; }
+  }
+  *{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Hebrew",sans-serif}
+  main{max-width:560px;margin:0 auto;padding:14px 12px 90px}
+  h1{font-size:19px;margin:6px 0 2px} .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .chip{display:inline-block;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);
+    border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;margin-left:6px}
+  .verdict{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:13.5px}
+  .verdict b{color:var(--accent)}
+
+  .stage{display:flex;justify-content:center;padding:4px 0 18px}
+  .phone{width:280px;height:585px;border-radius:34px;background:linear-gradient(180deg,#e9e2f7 0%,#f3edff 18%,#eef7ef 60%,#f3edff 100%);
+    position:relative;overflow:hidden;box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 25%,transparent),inset 0 0 0 2px var(--line);color:#2d2438}
+  .stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:#c9baf0;opacity:.8}
+
+  /* before strip (broken reference) */
+  .before{display:flex;gap:6px;align-items:center;height:74px;padding:8px;position:relative}
+  .before .gear{width:26px;height:26px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .before .pill{border-radius:999px;padding:1px 7px;font-size:9.5px;font-weight:800;white-space:nowrap;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .before .t{position:absolute;top:26px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:#10b981}
+  .before .card{position:absolute;top:34px;left:50%;transform:translateX(-50%);width:88%;background:#fff;border-radius:10px;padding:4px 8px;font-size:9.5px;font-weight:700;direction:rtl}
+  .before .clip{position:absolute;top:30px;left:6px;width:44px;height:14px;border-radius:8px;background:#a78bfa;color:#fff;font-size:8px;font-weight:800;text-align:center;line-height:14px}
+
+  .langrow{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:5}
+  .langrow button{border:0;border-radius:999px;padding:3px 10px;font-size:10px;font-weight:900;cursor:pointer;background:#ffffffcc;color:#4b4360}
+  .langrow button.on{background:#7C3AED;color:#fff}
+
+  .hudbar{display:flex;align-items:center;gap:5px;padding:30px 9px 6px}
+  .hudbar .gear{width:30px;height:30px;border-radius:50%;background:#fff;flex:none;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.14)}
+  .hearts{display:flex;gap:2px;flex:none}
+  .heart{width:11px;height:11px;background:#ef4444;border-radius:3px 3px 0 0;transform:rotate(-45deg) scale(.75);position:relative}
+  .heart:before,.heart:after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:inherit;top:-5.5px}
+  .heart:before{left:-5px}.heart:after{left:0;top:0}
+  .heart.off{background:#d8d5e2}
+  .timer{margin-inline:auto;background:#fff;border-radius:999px;padding:4px 13px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(124,58,237,.18)}
+  .timer .dot{width:9px;height:9px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .prog{background:#fff;border-radius:999px;padding:4px 11px;font-weight:800;font-size:11.5px;flex:none;box-shadow:0 1px 4px rgba(0,0,0,.1);white-space:nowrap}
+  .hud2chip{display:flex;justify-content:center;padding:0 0 4px}
+  .hud2chip[hidden]{display:none}
+  .hud2chip span{font-size:9px;font-weight:900;color:#059669;letter-spacing:1px;text-transform:uppercase}
+
+  .problem{margin:2px 10px 0;background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 4px 14px rgba(124,58,237,.10);text-align:center}
+  .problem .instr{font-size:12.5px;font-weight:700;color:#4b4360;margin:0 0 6px}
+  .problem .eq{direction:ltr;unicode-bidi:isolate;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:900;font-size:36px;letter-spacing:1px;color:#2d2438;line-height:1.05;white-space:nowrap}
+  .problem.hero .instr{font-size:10px;color:#8a8298}
+  .problem.hero .eq{font-size:40px;color:#7C3AED}
+  .field{position:absolute;top:226px;bottom:0;left:0;right:0;overflow:hidden}
+  .ghost{position:absolute;top:38%;left:38%;width:40px;height:40px;border-radius:50%;border:2px dashed #c9baf0;opacity:.55}
+  .bubble{position:absolute;bottom:26px;width:96px;height:96px;border-radius:50%;
+    box-shadow:0 10px 28px rgba(239,68,88,.45),inset 0 -8px 14px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center}
+  .bubble .num{font-size:34px;font-weight:900;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+  .bubble.c{left:50%;transform:translateX(-50%);background:radial-gradient(circle at 32% 28%,#ff8a8a,#ef4460 62%,#c026d3)}
+  .bubble.r{right:14px;background:radial-gradient(circle at 32% 28%,#fbbf24,#f59e0b 55%,#d97706)}
+  .multi{position:absolute;top:-13px;inset-inline-end:4px;background:#7C3AED;color:#fff;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:900;box-shadow:0 3px 10px rgba(124,58,237,.4)}
+  .bubble.r .multi{background:#ef4444}
+
+  .group{margin:16px 0 6px;font-size:12px;font-weight:900;color:#059669;letter-spacing:.6px}
+  .opts{display:flex;flex-wrap:wrap;gap:7px}
+  .opt{min-height:40px;display:flex;align-items:center;padding:8px 13px;border-radius:12px;border:2px solid var(--line);
+    background:var(--card);font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;user-select:none}
+  .opt small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+  .opt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card));color:var(--accent)}
+  .pickbar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:9px;align-items:center;z-index:9}
+  .picks{flex:1;font-size:12.5px;font-weight:700;min-width:0}
+  .picks code{font-size:11.5px;background:color-mix(in srgb,#059669 14%,transparent);color:#059669;padding:1px 6px;border-radius:6px}
+  button.copy{min-height:40px;padding:0 16px;border-radius:12px;border:0;background:var(--accent);color:#fff;font-weight:900;font-size:13px;cursor:pointer}
+  .note{color:var(--muted);font-size:11.5px;margin:8px 0 0}
+  details{margin:12px 0} summary{cursor:pointer;font-size:13px;font-weight:800;color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <h1>HMA Blitz — Screen Rework: Pick Your Version <span class="chip">v1 · interactive</span></h1>
+  <p class="sub">Both counselors agree on the skeleton — fixed-slot top HUD, an RTL/LTR-split problem card, a clean spawn field, and the answer bubble inside thumb reach (agy: <b>COMBO A+B+C+D, constrained</b> · hermes: <b>COMBO A+B+C</b> — hero folded into the split card). What's left open is the five decisions below. Tap your preferences → <b>Copy picks</b> → paste to AmosBot in Telegram. Game content itself can be flipped between Hebrew and English with the HE/EN switch — exactly like the real app's language toggle.</p>
+
+  <div class="verdict">
+    <b>Counsel verdict — closed (2 voices):</b><br>
+    <b>agy</b> (gemini-3.1-pro-high): COMBO A+B+C+D (constrained) · <b>hermes</b> (Claude): COMBO A+B+C — a mid-screen hero competes with the bubble field, so the big equation belongs UNDER the HUD as deck 2 of the split card (that is exactly the P2 pick below — yours to make).<br>
+    Shared skeleton: (a) fixed-slot HUD card — adapt the in-repo ArcadeHUD precedent (fixed right/center/left slots), NOT justify-between (the collision source) · (b) split problem card: deck 1 = clean RTL Hebrew sentence, deck 2 = equation alone, <code>dir="ltr"</code>, big mono — the ONE bidi rule; FSI/PDI isolates stay as belt-and-braces · (c) bottom thumb-zone bubble, multiplier + chips attached to the bubble rim, overlay badges anchored to the play-field band — never top-N px.<br>
+    <b>Live-prod check (today, headless 390×844):</b> the complaint screenshot was a stale cached build — the current deploy already renders clean HUD rows, no card-over-title, and correct RTL+digit runs (“פוצצו את הבועה שכתוב עליה 7” unscrambled). What still stands: the equation mixed inline inside the card, justify-between fragility at higher item counts, top-anchored overlay badges (FrenzyOverlay), redundant chips.
+  </div>
+
+  <div class="group">BEFORE — the complaint, as screenshotted (stale cached build)</div>
+  <div class="stage"><div class="phone" style="height:96px">
+    <div class="before">
+      <div class="gear">⚙️</div>
+      <span class="pill" style="color:#ef4444">2s ●</span>
+      <span class="pill" style="color:#7C3AED">Lv 3 ★</span>
+      <span class="pill">0 ◎</span>
+      <span class="pill">10 ⚡</span>
+      <div class="t">Blitz Mode / Problem Rapid</div>
+      <div class="card">= 98 - 814 — פוצצו את הבועה עם התשובה</div>
+      <div class="clip">3x הכפל</div>
+    </div>
+  </div></div>
+  <p class="note" style="text-align:center;margin:-8px 0 14px">Ram's phone showed a cached old build. Today's deployed build, verified headless at 390×844: clean HUD rows, no card-over-title, RTL+digits correct — the rework now targets the structural items only.</p>
+
+  <div class="group">LIVE MOCK — toggle &amp; see instantly</div>
+  <div class="stage"><div class="phone" id="mock">
+    <div class="langrow">
+      <button id="langHE" class="on" onclick="setLang('he')">עברית</button>
+      <button id="langEN" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="stars" id="stars"></div>
+    <div class="hudbar" id="hud">
+      <div class="gear" id="hudGear">⚙️</div>
+      <div class="hearts" id="hudHearts"><span class="heart"></span><span class="heart"></span><span class="heart off"></span></div>
+      <div class="timer"><span class="dot"></span> 2s</div>
+      <div class="prog" id="hudProg">שלב 10 • 45/50 ◎</div>
+    </div>
+    <div class="hud2chip" id="hud2" hidden><span>Blitz • Rapid</span></div>
+    <div class="field">
+      <div class="ghost" id="ghost" hidden></div>
+      <div class="bubble" id="bubble"><span class="multi" id="multi">3x הכפל 392</span><span class="num">716</span></div>
+    </div>
+    <div class="problem" id="problem">
+      <div class="instr" id="instr">פוצצו את הבועה עם התשובה</div>
+      <div class="eq" id="eq">814 − 98 =</div>
+    </div>
+  </div></div>
+
+  <div class="group">P1 — Top HUD structure</div>
+  <div class="opts" data-p="P1">
+    <button class="opt on" data-v="1row">Single row <small>everything compact in one bar</small></button>
+    <button class="opt" data-v="2row">HUD + title chip <small>thin second row: Blitz • Rapid</small></button>
+  </div>
+
+  <div class="group">P2 — Problem card</div>
+  <div class="opts" data-p="P2">
+    <button class="opt on" data-v="stacked">Split <small>both counselors: RTL sentence + big LTR equation</small></button>
+    <button class="opt" data-v="hero">Hero math <small>agy: yes-constrained · hermes: no — it competes with the bubble field</small></button>
+  </div>
+
+  <div class="group">P3 — Answer bubble position</div>
+  <div class="opts" data-p="P3">
+    <button class="opt on" data-v="c">Center-bottom <small>symmetric, left-thumb reach</small></button>
+    <button class="opt" data-v="r">Right-bottom <small>right-hand thumb reach</small></button>
+  </div>
+
+  <div class="group">P4 — Play field</div>
+  <div class="opts" data-p="P4">
+    <button class="opt on" data-v="pure">Pure empty <small>both counselors: no lookalike distractors for a 6yo</small></button>
+    <button class="opt" data-v="ghost">Subtle target ghost <small>soft hint where to pop</small></button>
+  </div>
+
+  <div class="group">P5 — Bubble color</div>
+  <div class="opts" data-p="P5">
+    <button class="opt on" data-v="p">Purple-pink <small>current palette</small></button>
+    <button class="opt" data-v="a">Warm amber <small>matches the parent hub</small></button>
+  </div>
+
+  <details><summary>Why like this? (the screen analysis findings)</summary>
+    <div class="verdict" style="margin-top:8px">
+      • The title + subtitle row drowns under the white card → title removed / becomes a chip.<br>
+      • The Hebrew sentence + math in one line scrambles via bidi → two blocks: kids read RTL correctly, then see the LTR equation.<br>
+      • Floating badges (3x multiplier / stage 10) bite into the card → merged into the HUD / onto the bubble.<br>
+      • The play field stays deliberately empty — both counselors: a faint duplicate of the target number is a lookalike distractor for a 6yo.<br>
+      • <b>hermes implementation notes:</b> split the i18n key — a new <code>bubble.solveEquationSentence</code> key with the equation as its own render slot (today it is baked into one string <code>...: ...</code>). HUD slots: [gear | timer | hearts] · score · [Lv | combo-suffix] — like the repo's own PracticeMode HUD. The old clipping chip sat at a top-N px absolute position over the header band — overlay chips must attach to the bubble rim / play-field band. Mode strip: keep the session progress bar; the separate score strip dies into the HUD. Gate: a Playwright render assert — the equation rect stays isolated from the RTL sentence rect — plus the existing locale-parity test.
+    </div>
+  </details>
+
+  <div class="pickbar">
+    <div class="picks" id="picks">Picks: <code>P1:1row</code> <code>P2:stacked</code> <code>P3:c</code> <code>P4:pure</code> <code>P5:p</code></div>
+    <button class="copy" id="copy">Copy picks</button>
+  </div>
+  <p class="note">Copy picks → paste to AmosBot on Telegram. Your pick becomes the gated implementation spec. Game text preview: HE/EN switch above the mock (mirrors the app's own language toggle).</p>
+</main>
+<script>
+  const PICKS = {P1:'1row',P2:'stacked',P3:'c',P4:'pure',P5:'p'};
+  let LANG = 'he';
+  const STR = {
+    he:{hudDir:'rtl', instr:'פוצצו את הבועה עם התשובה', stage:'שלב 10 • 45/50 ◎', multi:'3x הכפל 392', chip:'BLITZ • RAPID'},
+    en:{hudDir:'ltr', instr:'Pop the bubble with the answer', stage:'Stage 10 • 45/50 ◎', multi:'3x x392', chip:'BLITZ • RAPID'}
+  };
+  // deterministic starfield
+  const st = document.getElementById('stars');
+  let seed = 41;
+  const rnd = () => (seed = (seed*1103515245+12345) & 0x7fffffff) / 0x7fffffff;
+  for (let i=0;i<26;i++){ const s=document.createElement('i'); s.style.left=(rnd()*96+2)+'%'; s.style.top=(rnd()*92+2)+'%'; s.style.opacity=(.25+.6*rnd()).toFixed(2); st.appendChild(s); }
+
+  function setLang(l){
+    LANG = l;
+    const s = STR[l];
+    document.getElementById('mock').dir = s.hudDir;
+    document.getElementById('problem').dir = s.hudDir;
+    document.getElementById('hud').dir = s.hudDir;
+    document.getElementById('instr').textContent = s.instr;
+    document.getElementById('hudProg').textContent = s.stage;
+    document.getElementById('multi').textContent = s.multi;
+    document.getElementById('hud2').firstChild.textContent = s.chip.toUpperCase();
+    document.getElementById('langHE').classList.toggle('on', l==='he');
+    document.getElementById('langEN').classList.toggle('on', l==='en');
+    render();
+  }
+  function render(){
+    document.getElementById('hud2').hidden = PICKS.P1!=='2row';
+    document.getElementById('problem').className = 'problem ' + (PICKS.P2==='hero'?'hero':'');
+    document.getElementById('bubble').className = 'bubble ' + (PICKS.P3==='r'?'r':'c');
+    document.getElementById('ghost').hidden = PICKS.P4!=='ghost';
+    document.getElementById('bubble').style.background = PICKS.P5==='a'
+      ? 'radial-gradient(circle at 32% 28%,#fbbf24,#f59e0b 55%,#d97706)'
+      : 'radial-gradient(circle at 32% 28%,#ff8a8a,#ef4460 62%,#c026d3)';
+    const txt = 'HMA-BLITZ-REWORK v1 — ' + Object.entries(PICKS).map(([k,v])=>k+':'+v).join(' ');
+    document.getElementById('picks').innerHTML = 'Picks: ' + Object.entries(PICKS).map(([k,v])=>'<code>'+k+':'+v+'</code>').join(' ');
+    document.getElementById('copy').textContent = 'Copy picks';
+    document.getElementById('copy').dataset.txt = txt;
+  }
+  document.querySelectorAll('.opts').forEach(g=>{
+    g.addEventListener('click', e=>{
+      const b = e.target.closest('.opt'); if(!b) return;
+      g.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); PICKS[g.dataset.p] = b.dataset.v; render();
+    });
+  });
+  document.getElementById('copy').addEventListener('click', ()=>{
+    const b = document.getElementById('copy');
+    const txt = b.dataset.txt;
+    let ok = false;
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed'; ta.style.opacity = '0'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { ok = document.execCommand('copy'); } catch(e) { ok = false; }
+    document.body.removeChild(ta);
+    if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(()=>{}, ()=>{});
+      ok = true;
+    }
+    b.textContent = ok ? 'Copied \u2713' : 'Long-press the Picks text';
+    if (ok) setTimeout(render, 1400);
+  });
+  render();
+</script>
+</body>
+</html>

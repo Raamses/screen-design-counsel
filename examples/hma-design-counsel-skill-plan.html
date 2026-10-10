@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>The Skill: Screen-Design-Counsel — The Plan</title>
+<style>
+  :root{--bg:#F4F0FA;--card:#fff;--ink:#2d2438;--muted:#7a7290;--line:#e4def0;--accent:#7C3AED;--accent2:#059669;--gold:#f59e0b}
+  @media (prefers-color-scheme:dark){:root{--bg:#171522;--card:#211d30;--ink:#ece9f5;--muted:#a29bbc;--line:#37324a;--accent:#a78bfa;--accent2:#34d399;--gold:#fbbf24}}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Hebrew",sans-serif}
+  main{max-width:560px;margin:0 auto;padding:14px 12px 40px}
+  h1{font-size:19px;margin:6px 0 2px} .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px}
+  .card h2{font-size:14.5px;margin:0 0 7px;color:var(--accent)}
+  .card p,.card li{font-size:13.5px;margin:0 0 6px}
+  ol.steps{margin:0;padding-left:18px} ol.steps li{margin:0 0 7px}
+  .tag{display:inline-block;background:color-mix(in srgb,#059669 14%,transparent);color:#059669;border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:800;margin-left:6px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:color-mix(in srgb,#7C3AED 10%,transparent);padding:1px 5px;border-radius:5px;word-break:break-all;color:var(--accent)}
+  .flow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12px;font-weight:700}
+  .flow b{background:var(--card);border:1.5px solid var(--accent);color:var(--accent);border-radius:8px;padding:5px 9px}
+  .flow i{color:var(--muted)}
+  .v{border-left:3px solid var(--gold);padding-left:9px;color:var(--muted);font-size:12.5px;margin:6px 0}
+</style>
+</head>
+<body>
+<main>
+  <h1>The Skill: Screen-Design-Counsel <span class="tag">PILOT-FIRST</span></h1>
+  <p class="sub">Full spec — from complaint to implementation. Every "this screen is broken / crowded / confusing" enters one fixed process.</p>
+
+  <div class="card">
+    <h2>The process (6 steps)</h2>
+    <ol class="steps">
+      <li><b>Anatomy extraction</b> — screenshot + reading the real component (DOM + CSS) → precise defects (crowding, overlap, bidi, touch-target sizes)</li>
+      <li><b>Design directions</b> — 3-4 concrete alternatives</li>
+      <li><b>Live mockup gallery</b> — one HTML page on the Pi share server (:8909), phone-first: live mock + toggles + pick copying</li>
+      <li><b>Ram reads picks in Telegram</b> — the copied pick IS the spec</li>
+      <li><b>Gated implementation</b> — builder (glm/agy) + review ladder (agy binding → Claude at quota reset) in an isolated worktree</li>
+      <li><b>390×844 screenshot verification</b> — playwright + compare to the mockup before merge</li>
+    </ol>
+    <div class="flow">
+      <b>Complaint</b><i>→</i><b>Anatomy</b><i>→</i><b>Ideation</b><i>→</i><b>Pick gallery</b><i>→</i><b>Spec</b><i>→</i><b>Gated build</b>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Canvas feel: Figma-like, simplified</h2>
+    <p>Selection <b>and</b> controls mimic Figma, stripped to the minimum: objects with bounding-box outlines, tap = select, <b>hold ~1s = select the PARENT element</b> (the tag relocates up a level — hold again to climb further), tap-again = untag, chip-tap = edit the note, long-press = untag-all (multi-select via plain taps), and an inspector-lite for the selected element. Drag stays out of V1 — it arrives with V2 if the pilot shows the need; the taps stay the primary gesture. <b>Capability reminder:</b> a first-run gesture legend (dismissed by the first tap), a persistent "?" chip for recall, and an idle nudge that fades out after your first tag — non-blocking, state-aware.</p>
+    <p class="v">Ram's ruling 22:42: "Make it something like a figma screen, it can be simplified but the selecting and controlling can be similar."</p>
+  </div>
+
+  <div class="card">
+    <h2>Special tooling (V1)</h2>
+    <p>• <code>template.html</code> — one 390×844 phone-frame with CSS-var token slots (<code>--c-bg, --c-card, --c-accent, --c-text…</code>); different layouts come from the candidates' content blocks, not from template variety</p>
+    <p>• <code>extract_tokens.py</code> — pulls the repo's palette tokens (tailwind config / theme CSS) into the template's CSS variables — <b>re-run every pass</b>, never hardcode (anti-drift)</p>
+    <p>• <code>gen_candidates.py</code> — writes N numbered candidate pages into <code>passes/&lt;repo&gt;-&lt;screen&gt;-&lt;date&gt;/</code> from the template</p>
+    <p>• <code>verify.py</code> — Playwright 390×844 (he primary, en secondary): PNG per page + a headless bounding-box overlap report; the SAME check re-runs on every implementation PR before review</p>
+    <p class="v">Pick capture = localStorage + copy-back (the Copy picks button). Not in V1: a <code>/picks</code> POST endpoint on the share server, multi-screen galleries, A/B diffing, dashboards, per-repo SKILL.md variants.</p>
+  </div>
+
+  <div class="card">
+    <h2>Invocation contract</h2>
+    <p><code>/counsel screen &lt;component-path&gt; "&lt;complaint&gt;"</code></p>
+    <p>Natural triggers: "this screen is broken / crowded / confusing on mobile". Required inputs: the component path, the screen URL/path, the complaint. Skip heuristic: styling-only (colors/padding) → direct fix, no counsel; structural (DOM layout / bidi mixing / crowding) → full counsel (agy + Hermes + AmosBot).</p>
+  </div>
+
+  <div class="card">
+    <h2>Counsel verdicts — DECIDED (2 voices agree)</h2>
+    <p><b>agy (Gemini 3.1 Pro-high): PILOT-FIRST</b> — V1 = SKILL.md + phone-frame template + pick-capture.</p>
+    <p><b>Hermes (Claude): PILOT-FIRST</b> — "ship a pilot, not a platform" — plus one tooling correction and a strict tier ladder:</p>
+    <p>• <b>No POST server in V1</b> — a static gallery can't push anything; picks stay in <code>localStorage</code> + a copy-back summary block (exactly like the live ideas page). The <code>mockup-server.py</code> POST endpoint is dropped.</p>
+    <p>• <b>Tier ladder</b>: T0 = mechanical violations caught by tooling (overlap check, locale-parity, contrast tokens) → direct fix, no counsel · T1 = one-decision fixes after a failing T0 · T2 = full gallery counsel ONLY for multi-direction layout systems, RTL/bidi or kid-cognition risk, or Ram-flagged screens. A screen enters T2 at most once; regressions re-enter via T0/T1 with the gallery diffed against the prior pass.</p>
+    <p>• <b>Invocation gate</b>: the skill fires ONLY when (1) a screenshot + the component path exist, and (2) the complaint is visual/layout (crowding, overlap, bidi-mix, contrast) — not behavior/logic.</p>
+    <p>• <b>Per-pass artifacts</b>: <code>passes/&lt;repo&gt;-&lt;screen&gt;-&lt;date&gt;/</code> holds the numbered candidate pages + verdict.json; palette tokens are re-extracted from the repo's theme on EVERY pass (anti-drift). Canonical truth stays in the repo (tests) + mailbox (decisions) — no parallel memory.</p>
+    <p>• <b>One ruler for mockups and code</b>: no candidate reaches Ram's gallery and no implementation PR merges until it passes the same 390×844 headless overlap check + PNG harness (reuse the e2e viewport patterns — <code>e2e/arcade-game-over.spec.ts</code> already does bounding-rect-in-viewport checks). Codify exactly what worked by hand this time; nothing speculative in V1.</p>
+  </div>
+
+  <div class="card">
+    <h2>SKILL.md draft — file structure</h2>
+    <p><code>~/.openclaw/workspace/skills/screen-design-counsel/SKILL.md</code> — description + triggers; the 6-step process; the invocation contract; gate rules (fenced reviewer / builder / gate separation); HARD RULES: RTL-native, phone-first, ALL strings via t() (the he/en dictionary), no implementation before Ram picks, no self-merge, review ladder per the standing policy (agy binding; paid OpenRouter models banned).</p>
+  </div>
+
+  <p style="color:var(--muted);font-size:12px">Served from the Pi share · 2026-10-10 · AmosBot</p>
+</main>
+</body>
+</html>
